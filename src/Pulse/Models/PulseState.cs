@@ -2,6 +2,7 @@ namespace Pulse.Models;
 
 public class PulseState
 {
+    public List<string> Categories { get; set; } = ["Work", "Hobby", "Relationship", "Other"];
     public List<ActiveTask> Active { get; set; } = [];
     public List<RecentTask> Recent { get; set; } = [];  // Max 100, LRU
     public DateTime? LastCheckIn { get; set; }

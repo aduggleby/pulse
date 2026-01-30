@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
@@ -223,6 +224,19 @@ public partial class CheckInWindow : Window
         CategoryHobby.IsChecked = category == Category.Hobby;
         CategoryRelationship.IsChecked = category == Category.Relationship;
         CategoryOther.IsChecked = category == Category.Other;
+    }
+
+    private void OnCategoryClick(object? sender, RoutedEventArgs e)
+    {
+        ResetAutoCloseTimer();
+        // Ensure only one category is selected (radio-like behavior)
+        if (sender is ToggleButton clicked)
+        {
+            CategoryWork.IsChecked = clicked == CategoryWork;
+            CategoryHobby.IsChecked = clicked == CategoryHobby;
+            CategoryRelationship.IsChecked = clicked == CategoryRelationship;
+            CategoryOther.IsChecked = clicked == CategoryOther;
+        }
     }
 
     private void ResetAutoCloseTimer()

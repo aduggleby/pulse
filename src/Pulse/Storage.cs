@@ -43,6 +43,7 @@ public partial class Storage
             : _yamlDeserializer.Deserialize<PulseState>(frontmatter) ?? new PulseState();
 
         // Ensure lists are not null (YAML can deserialize null)
+        state.Categories ??= ["Work", "Hobby", "Relationship", "Other"];
         state.Active ??= [];
         state.Recent ??= [];
 
