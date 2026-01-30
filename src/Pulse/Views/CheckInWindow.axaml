@@ -226,7 +226,31 @@
 
     <!-- Main container with rounded corners -->
     <Border Classes="main-container" Margin="12">
-        <DockPanel Margin="48,40">
+        <Grid>
+            <!-- "I'm back" overlay (shown after auto-close) -->
+            <Panel x:Name="ImBackPanel" IsVisible="False" ZIndex="100">
+                <Border Background="#1A1918" Opacity="0.95"/>
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="40">
+                    <TextBlock Text="You were away"
+                               FontSize="48"
+                               FontWeight="Light"
+                               Foreground="#8A8480"
+                               HorizontalAlignment="Center"/>
+                    <TextBlock Text="Your tasks were stopped"
+                               FontSize="28"
+                               Foreground="#6A6560"
+                               HorizontalAlignment="Center"/>
+                    <Button x:Name="ImBackButton"
+                            Content="I'm Back"
+                            Classes="primary-button"
+                            FontSize="42"
+                            Padding="100,32"
+                            HorizontalAlignment="Center"
+                            Click="OnImBackClick"/>
+                </StackPanel>
+            </Panel>
+
+            <DockPanel Margin="48,40">
 
             <!-- Header Section -->
             <StackPanel DockPanel.Dock="Top" Margin="0,0,0,40">
@@ -433,5 +457,6 @@
                 </StackPanel>
             </ScrollViewer>
         </DockPanel>
+        </Grid>
     </Border>
 </Window>

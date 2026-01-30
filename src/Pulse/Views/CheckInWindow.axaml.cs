@@ -115,8 +115,8 @@ public partial class CheckInWindow : Window
         _countdownTimer.Stop();
         var previousCheckIn = _state.LastCheckIn;
 
-        // Stop existing tasks at the time popup opened (skip new tasks added during this session)
-        foreach (var task in Tasks.Where(t => t.IsChecked && !t.IsNew))
+        // Stop all tasks (user was away)
+        foreach (var task in Tasks.Where(t => !t.IsNew))
         {
             _todayLog = _storage.AppendToLog(_todayLog, new ActiveTask
             {
@@ -131,7 +131,33 @@ public partial class CheckInWindow : Window
         _state.LastCheckIn = _openedAt;
         _storage.Save(_state, _todayLog, previousCheckIn);
 
-        Close();
+        // Show "I'm back" overlay instead of closing
+        ImBackPanel.IsVisible = true;
+        DoneButton.Content = "Done";
+    }
+
+    private void OnImBackClick(object? sender, RoutedEventArgs e)
+    {
+        ImBackPanel.IsVisible = false;
+
+        // Reload tasks from recent (all unchecked)
+        Tasks.Clear();
+        var recentTasks = _state.Recent.Take(5);
+        foreach (var recent in recentTasks)
+        {
+            Tasks.Add(new TaskViewModel
+            {
+                Description = recent.Description,
+                Category = recent.Category,
+                IsChecked = false,
+                Started = DateTime.Now,
+                IsNew = true
+            });
+        }
+
+        // Reset auto-close timer
+        ResetAutoCloseTimer();
+        _countdownTimer.Start();
     }
 
     private void OnDoneClick(object? sender, RoutedEventArgs e)
