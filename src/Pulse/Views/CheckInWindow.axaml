@@ -4,129 +4,396 @@
         x:Class="Pulse.Views.CheckInWindow"
         x:DataType="views:CheckInWindow"
         Title="Pulse"
-        Width="400"
-        Height="500"
+        Width="1040"
+        Height="1000"
         WindowStartupLocation="CenterScreen"
-        CanResize="False">
+        CanResize="False"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="0"
+        Background="Transparent"
+        TransparencyLevelHint="AcrylicBlur">
 
-    <DockPanel Margin="16">
-        <!-- Header -->
-        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,16">
-            <TextBlock Text="{Binding CurrentTime}"
-                       DockPanel.Dock="Right"
-                       VerticalAlignment="Center"
-                       FontSize="16"
-                       Foreground="Gray"/>
-            <TextBlock Text="What are you doing?"
-                       FontSize="20"
-                       FontWeight="SemiBold"/>
-        </DockPanel>
+    <Window.Styles>
+        <!-- Base colors as style resources -->
+        <Style Selector="Window">
+            <Setter Property="Foreground" Value="#E8E4DF"/>
+        </Style>
 
-        <!-- Done Button -->
-        <Button x:Name="DoneButton"
-                DockPanel.Dock="Bottom"
-                Content="Done"
-                HorizontalAlignment="Center"
-                Padding="32,8"
-                Margin="0,16,0,0"
-                Click="OnDoneClick"/>
+        <!-- Main container styling -->
+        <Style Selector="Border.main-container">
+            <Setter Property="Background" Value="#1A1918"/>
+            <Setter Property="CornerRadius" Value="16"/>
+            <Setter Property="BorderBrush" Value="#2A2725"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
 
-        <!-- Add Task Panel (collapsible) -->
-        <Border x:Name="AddTaskPanel"
-                DockPanel.Dock="Bottom"
-                IsVisible="False"
-                BorderBrush="LightGray"
-                BorderThickness="1"
-                CornerRadius="4"
-                Padding="12"
-                Margin="0,12,0,0">
-            <StackPanel Spacing="12">
-                <!-- Search/New Task Input -->
-                <TextBox x:Name="TaskSearchBox"
-                         Watermark="Search or type new task..."
-                         TextChanged="OnTaskSearchChanged"/>
+        <!-- Header time styling -->
+        <Style Selector="TextBlock.time-display">
+            <Setter Property="FontSize" Value="84"/>
+            <Setter Property="FontWeight" Value="Light"/>
+            <Setter Property="Foreground" Value="#D4A574"/>
+            <Setter Property="LetterSpacing" Value="4"/>
+        </Style>
 
-                <!-- Recent Tasks List -->
-                <ListBox x:Name="RecentTasksList"
-                         MaxHeight="120"
-                         SelectionChanged="OnRecentTaskSelected">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate x:DataType="views:RecentTaskViewModel">
-                            <DockPanel>
-                                <TextBlock Text="{Binding CategoryDisplay}"
-                                           DockPanel.Dock="Right"
-                                           Foreground="Gray"
-                                           Margin="8,0,0,0"/>
-                                <TextBlock Text="{Binding Description}"/>
-                            </DockPanel>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
+        <!-- Header prompt styling -->
+        <Style Selector="TextBlock.header-prompt">
+            <Setter Property="FontSize" Value="36"/>
+            <Setter Property="FontWeight" Value="Normal"/>
+            <Setter Property="Foreground" Value="#8A8480"/>
+            <Setter Property="Margin" Value="0,12,0,0"/>
+        </Style>
 
-                <!-- Category Selection -->
-                <StackPanel Spacing="8">
-                    <TextBlock Text="Category:" FontWeight="SemiBold"/>
-                    <WrapPanel>
-                        <RadioButton x:Name="CategoryWork"
-                                     Content="Work"
-                                     GroupName="Category"
-                                     IsChecked="True"
-                                     Margin="0,0,16,0"/>
-                        <RadioButton x:Name="CategoryHobby"
-                                     Content="Hobby"
-                                     GroupName="Category"
-                                     Margin="0,0,16,0"/>
-                        <RadioButton x:Name="CategoryRelationship"
-                                     Content="Relationship"
-                                     GroupName="Category"
-                                     Margin="0,0,16,0"/>
-                        <RadioButton x:Name="CategoryOther"
-                                     Content="Other"
-                                     GroupName="Category"/>
-                    </WrapPanel>
-                </StackPanel>
+        <!-- Task card styling -->
+        <Style Selector="Border.task-card">
+            <Setter Property="Background" Value="#242220"/>
+            <Setter Property="CornerRadius" Value="16"/>
+            <Setter Property="Padding" Value="28,24"/>
+            <Setter Property="Margin" Value="0,10"/>
+            <Setter Property="BorderBrush" Value="#2E2B28"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+        <Style Selector="Border.task-card:pointerover">
+            <Setter Property="Background" Value="#2A2725"/>
+            <Setter Property="BorderBrush" Value="#3A3632"/>
+        </Style>
 
-                <!-- Add/Cancel Buttons -->
-                <StackPanel Orientation="Horizontal"
-                            HorizontalAlignment="Right"
-                            Spacing="8">
-                    <Button Content="Cancel" Click="OnCancelAddClick"/>
-                    <Button x:Name="AddButton"
-                            Content="Add"
-                            Click="OnAddTaskClick"/>
-                </StackPanel>
+        <!-- Custom checkbox styling -->
+        <Style Selector="Border.checkbox-box">
+            <Setter Property="Width" Value="44"/>
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="BorderBrush" Value="#4A4540"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style Selector="Border.checkbox-box.checked">
+            <Setter Property="Background" Value="#D4A574"/>
+            <Setter Property="BorderBrush" Value="#D4A574"/>
+        </Style>
+        <Style Selector="TextBlock.checkmark">
+            <Setter Property="Text" Value="✓"/>
+            <Setter Property="FontSize" Value="32"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#1A1918"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,-2,0,0"/>
+        </Style>
+
+        <!-- Category badge styling -->
+        <Style Selector="Border.category-badge">
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="18,8"/>
+        </Style>
+        <Style Selector="Border.category-work">
+            <Setter Property="Background" Value="#2D3A2D"/>
+        </Style>
+        <Style Selector="Border.category-hobby">
+            <Setter Property="Background" Value="#3A2D3A"/>
+        </Style>
+        <Style Selector="Border.category-relationship">
+            <Setter Property="Background" Value="#2D3A3A"/>
+        </Style>
+        <Style Selector="Border.category-other">
+            <Setter Property="Background" Value="#3A3A2D"/>
+        </Style>
+        <Style Selector="TextBlock.category-text">
+            <Setter Property="FontSize" Value="22"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="LetterSpacing" Value="1"/>
+        </Style>
+        <Style Selector="TextBlock.category-work">
+            <Setter Property="Foreground" Value="#7EBF7E"/>
+        </Style>
+        <Style Selector="TextBlock.category-hobby">
+            <Setter Property="Foreground" Value="#BF7EBF"/>
+        </Style>
+        <Style Selector="TextBlock.category-relationship">
+            <Setter Property="Foreground" Value="#7EBFBF"/>
+        </Style>
+        <Style Selector="TextBlock.category-other">
+            <Setter Property="Foreground" Value="#BFBF7E"/>
+        </Style>
+
+        <!-- Primary button (Done) -->
+        <Style Selector="Button.primary-button">
+            <Setter Property="Background" Value="#D4A574"/>
+            <Setter Property="Foreground" Value="#1A1918"/>
+            <Setter Property="FontSize" Value="30"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="80,24"/>
+            <Setter Property="CornerRadius" Value="14"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        </Style>
+        <Style Selector="Button.primary-button:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#E0B585"/>
+        </Style>
+        <Style Selector="Button.primary-button:pressed /template/ ContentPresenter">
+            <Setter Property="Background" Value="#C49564"/>
+        </Style>
+
+        <!-- Secondary button (Add Task, Cancel) -->
+        <Style Selector="Button.secondary-button">
+            <Setter Property="Background" Value="#2A2725"/>
+            <Setter Property="Foreground" Value="#B0AAA4"/>
+            <Setter Property="FontSize" Value="28"/>
+            <Setter Property="Padding" Value="36,18"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#3A3632"/>
+        </Style>
+        <Style Selector="Button.secondary-button:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#343130"/>
+            <Setter Property="Foreground" Value="#E8E4DF"/>
+        </Style>
+
+        <!-- Text input styling -->
+        <Style Selector="TextBox.search-input">
+            <Setter Property="Background" Value="#242220"/>
+            <Setter Property="Foreground" Value="#E8E4DF"/>
+            <Setter Property="BorderBrush" Value="#3A3632"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="14"/>
+            <Setter Property="Padding" Value="24,20"/>
+            <Setter Property="FontSize" Value="28"/>
+        </Style>
+        <Style Selector="TextBox.search-input:focus /template/ Border">
+            <Setter Property="BorderBrush" Value="#D4A574"/>
+        </Style>
+
+        <!-- ListBox styling -->
+        <Style Selector="ListBox">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+        <Style Selector="ListBoxItem">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Padding" Value="20,16"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Margin" Value="0,4"/>
+            <Setter Property="FontSize" Value="26"/>
+        </Style>
+        <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#2A2725"/>
+        </Style>
+        <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+            <Setter Property="Background" Value="#2E2B28"/>
+        </Style>
+
+        <!-- Radio button styling for categories -->
+        <Style Selector="RadioButton">
+            <Setter Property="Foreground" Value="#A0A0A0"/>
+            <Setter Property="FontSize" Value="26"/>
+            <Setter Property="Padding" Value="14,12"/>
+        </Style>
+        <Style Selector="RadioButton:checked">
+            <Setter Property="Foreground" Value="#E8E4DF"/>
+        </Style>
+
+        <!-- Section label -->
+        <Style Selector="TextBlock.section-label">
+            <Setter Property="FontSize" Value="24"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#6A6560"/>
+            <Setter Property="LetterSpacing" Value="2"/>
+        </Style>
+
+        <!-- Add panel border -->
+        <Style Selector="Border.add-panel">
+            <Setter Property="Background" Value="#1E1D1C"/>
+            <Setter Property="BorderBrush" Value="#2E2B28"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="16"/>
+            <Setter Property="Padding" Value="36"/>
+        </Style>
+    </Window.Styles>
+
+    <!-- Main container with rounded corners -->
+    <Border Classes="main-container" Margin="12">
+        <DockPanel Margin="48,40">
+
+            <!-- Header Section -->
+            <StackPanel DockPanel.Dock="Top" Margin="0,0,0,40">
+                <DockPanel>
+                    <TextBlock Text="{Binding CurrentTime}"
+                               Classes="time-display"
+                               DockPanel.Dock="Right"
+                               VerticalAlignment="Top"/>
+                    <StackPanel>
+                        <TextBlock Text="PULSE"
+                                   FontSize="22"
+                                   FontWeight="Bold"
+                                   Foreground="#5A5650"
+                                   LetterSpacing="6"/>
+                        <TextBlock Text="What are you working on?"
+                                   Classes="header-prompt"/>
+                    </StackPanel>
+                </DockPanel>
             </StackPanel>
-        </Border>
 
-        <!-- Add Task Button -->
-        <Button x:Name="AddTaskButton"
-                DockPanel.Dock="Bottom"
-                Content="+ Add Task"
-                HorizontalAlignment="Left"
-                Margin="0,12,0,0"
-                Click="OnShowAddTaskClick"/>
+            <!-- Done Button -->
+            <Button x:Name="DoneButton"
+                    DockPanel.Dock="Bottom"
+                    Content="Done"
+                    Classes="primary-button"
+                    HorizontalAlignment="Center"
+                    Margin="0,32,0,0"
+                    Click="OnDoneClick"/>
 
-        <!-- Active Tasks List -->
-        <ScrollViewer>
-            <ItemsControl x:Name="TasksListBox" ItemsSource="{Binding Tasks}">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate x:DataType="views:TaskViewModel">
-                        <Border Margin="0,4" Padding="8"
-                                Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}"
-                                CornerRadius="4">
-                            <DockPanel>
-                                <TextBlock Text="{Binding CategoryDisplay}"
-                                           DockPanel.Dock="Right"
-                                           VerticalAlignment="Center"
-                                           Foreground="Gray"/>
-                                <CheckBox IsChecked="{Binding IsChecked}"
-                                          Content="{Binding Description}"
-                                          Margin="0,0,8,0"/>
-                            </DockPanel>
-                        </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </ScrollViewer>
-    </DockPanel>
+            <!-- Add Task Panel (collapsible) -->
+            <Border x:Name="AddTaskPanel"
+                    DockPanel.Dock="Bottom"
+                    IsVisible="False"
+                    Classes="add-panel"
+                    Margin="0,28,0,0">
+                <StackPanel Spacing="28">
+                    <!-- Search/New Task Input -->
+                    <TextBox x:Name="TaskSearchBox"
+                             Classes="search-input"
+                             Watermark="What are you starting?"
+                             TextChanged="OnTaskSearchChanged"/>
+
+                    <!-- Recent Tasks List -->
+                    <StackPanel IsVisible="{Binding #RecentTasksList.ItemCount}">
+                        <TextBlock Text="RECENT" Classes="section-label" Margin="4,0,0,16"/>
+                        <ListBox x:Name="RecentTasksList"
+                                 MaxHeight="200"
+                                 SelectionChanged="OnRecentTaskSelected">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate x:DataType="views:RecentTaskViewModel">
+                                    <DockPanel>
+                                        <Border DockPanel.Dock="Right"
+                                                Classes="category-badge"
+                                                Classes.category-work="{Binding IsWork}"
+                                                Classes.category-hobby="{Binding IsHobby}"
+                                                Classes.category-relationship="{Binding IsRelationship}"
+                                                Classes.category-other="{Binding IsOther}">
+                                            <TextBlock Text="{Binding CategoryName}"
+                                                       Classes="category-text"
+                                                       Classes.category-work="{Binding IsWork}"
+                                                       Classes.category-hobby="{Binding IsHobby}"
+                                                       Classes.category-relationship="{Binding IsRelationship}"
+                                                       Classes.category-other="{Binding IsOther}"/>
+                                        </Border>
+                                        <TextBlock Text="{Binding Description}"
+                                                   VerticalAlignment="Center"
+                                                   Foreground="#C0BAB4"/>
+                                    </DockPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </StackPanel>
+
+                    <!-- Category Selection -->
+                    <StackPanel Spacing="16">
+                        <TextBlock Text="CATEGORY" Classes="section-label" Margin="4,0,0,0"/>
+                        <WrapPanel>
+                            <RadioButton x:Name="CategoryWork"
+                                         Content="Work"
+                                         GroupName="Category"
+                                         IsChecked="True"
+                                         Margin="0,0,24,0"/>
+                            <RadioButton x:Name="CategoryHobby"
+                                         Content="Hobby"
+                                         GroupName="Category"
+                                         Margin="0,0,24,0"/>
+                            <RadioButton x:Name="CategoryRelationship"
+                                         Content="Relationship"
+                                         GroupName="Category"
+                                         Margin="0,0,24,0"/>
+                            <RadioButton x:Name="CategoryOther"
+                                         Content="Other"
+                                         GroupName="Category"/>
+                        </WrapPanel>
+                    </StackPanel>
+
+                    <!-- Add/Cancel Buttons -->
+                    <DockPanel Margin="0,8,0,0">
+                        <Button Content="Cancel"
+                                Classes="secondary-button"
+                                DockPanel.Dock="Left"
+                                Click="OnCancelAddClick"/>
+                        <Button x:Name="AddButton"
+                                Content="Add Task"
+                                Classes="primary-button"
+                                DockPanel.Dock="Right"
+                                HorizontalAlignment="Right"
+                                Padding="48,20"
+                                Click="OnAddTaskClick"/>
+                    </DockPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Add Task Button -->
+            <Button x:Name="AddTaskButton"
+                    DockPanel.Dock="Bottom"
+                    Content="+ Add Task"
+                    Classes="secondary-button"
+                    HorizontalAlignment="Left"
+                    Margin="0,28,0,0"
+                    Click="OnShowAddTaskClick"/>
+
+            <!-- Active Tasks List -->
+            <ScrollViewer Margin="0,8,0,0">
+                <StackPanel>
+                    <TextBlock Text="ACTIVE TASKS"
+                               Classes="section-label"
+                               Margin="4,0,0,20"
+                               IsVisible="{Binding Tasks.Count}"/>
+                    <ItemsControl x:Name="TasksListBox" ItemsSource="{Binding Tasks}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="views:TaskViewModel">
+                                <Border Classes="task-card" PointerPressed="OnTaskCardPressed">
+                                    <DockPanel>
+                                        <Border DockPanel.Dock="Right"
+                                                Classes="category-badge"
+                                                Classes.category-work="{Binding IsWork}"
+                                                Classes.category-hobby="{Binding IsHobby}"
+                                                Classes.category-relationship="{Binding IsRelationship}"
+                                                Classes.category-other="{Binding IsOther}"
+                                                VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding CategoryName}"
+                                                       Classes="category-text"
+                                                       Classes.category-work="{Binding IsWork}"
+                                                       Classes.category-hobby="{Binding IsHobby}"
+                                                       Classes.category-relationship="{Binding IsRelationship}"
+                                                       Classes.category-other="{Binding IsOther}"/>
+                                        </Border>
+                                        <Border Classes="checkbox-box"
+                                                Classes.checked="{Binding IsChecked}"
+                                                DockPanel.Dock="Left"
+                                                Margin="0,0,24,0">
+                                            <TextBlock Classes="checkmark" IsVisible="{Binding IsChecked}"/>
+                                        </Border>
+                                        <TextBlock Text="{Binding Description}"
+                                                   FontSize="30"
+                                                   Foreground="#E8E4DF"
+                                                   VerticalAlignment="Center"/>
+                                    </DockPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <!-- Empty state -->
+                    <StackPanel IsVisible="{Binding !Tasks.Count}"
+                                HorizontalAlignment="Center"
+                                Margin="0,100,0,0"
+                                Opacity="0.5">
+                        <TextBlock Text="No active tasks"
+                                   FontSize="32"
+                                   Foreground="#6A6560"
+                                   HorizontalAlignment="Center"/>
+                        <TextBlock Text="Click '+ Add Task' to get started"
+                                   FontSize="26"
+                                   Foreground="#4A4640"
+                                   HorizontalAlignment="Center"
+                                   Margin="0,12,0,0"/>
+                    </StackPanel>
+                </StackPanel>
+            </ScrollViewer>
+        </DockPanel>
+    </Border>
 </Window>

@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
 using Pulse.Models;
@@ -227,6 +228,15 @@ public partial class CheckInWindow : Window
         _autoCloseTimer.Stop();
         _autoCloseTimer.Start();
     }
+
+    private void OnTaskCardPressed(object? sender, PointerPressedEventArgs e)
+    {
+        ResetAutoCloseTimer();
+        if (sender is Border { DataContext: TaskViewModel task })
+        {
+            task.IsChecked = !task.IsChecked;
+        }
+    }
 }
 
 public class TaskViewModel : INotifyPropertyChanged
@@ -248,7 +258,11 @@ public class TaskViewModel : INotifyPropertyChanged
         }
     }
 
-    public string CategoryDisplay => $"[{Category}]";
+    public string CategoryName => Category.ToString();
+    public bool IsWork => Category == Category.Work;
+    public bool IsHobby => Category == Category.Hobby;
+    public bool IsRelationship => Category == Category.Relationship;
+    public bool IsOther => Category == Category.Other;
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -262,5 +276,9 @@ public class RecentTaskViewModel
 {
     public string Description { get; set; } = "";
     public Category Category { get; set; }
-    public string CategoryDisplay => $"[{Category}]";
+    public string CategoryName => Category.ToString();
+    public bool IsWork => Category == Category.Work;
+    public bool IsHobby => Category == Category.Hobby;
+    public bool IsRelationship => Category == Category.Relationship;
+    public bool IsOther => Category == Category.Other;
 }
