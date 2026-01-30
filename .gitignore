@@ -1,0 +1,25 @@
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Bb]in/
+[Oo]bj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# JetBrains Rider
+.idea/
+
+# NuGet
+*.nupkg
+*.snupkg
+packages/
+
+# macOS
+.DS_Store
