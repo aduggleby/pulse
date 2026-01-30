@@ -10,6 +10,7 @@ namespace Pulse;
 public partial class App : Application
 {
     private DispatcherTimer? _timer;
+    private CheckInWindow? _currentWindow;
 
     public override void Initialize()
     {
@@ -59,8 +60,16 @@ public partial class App : Application
 
     private void ShowCheckInWindow()
     {
-        var window = new CheckInWindow();
-        window.Show();
-        window.Activate();
+        // If window already exists and is visible, just activate it
+        if (_currentWindow is { IsVisible: true })
+        {
+            _currentWindow.Activate();
+            return;
+        }
+
+        _currentWindow = new CheckInWindow();
+        _currentWindow.Closed += (_, _) => _currentWindow = null;
+        _currentWindow.Show();
+        _currentWindow.Activate();
     }
 }

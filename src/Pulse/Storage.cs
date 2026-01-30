@@ -28,8 +28,35 @@ public partial class Storage
         _archiveDir = Path.Combine(home, "Me", "Info", "pulse");
     }
 
+    private void CleanupSyncConflicts()
+    {
+        // Clean up Syncthing conflict files in the Pulse directories
+        var directories = new[] { Path.GetDirectoryName(_pulsePath)!, _archiveDir };
+
+        foreach (var dir in directories)
+        {
+            if (!Directory.Exists(dir))
+                continue;
+
+            var conflictFiles = Directory.GetFiles(dir, "*.sync-conflict-*");
+            foreach (var file in conflictFiles)
+            {
+                try
+                {
+                    File.Delete(file);
+                }
+                catch
+                {
+                    // Ignore deletion errors
+                }
+            }
+        }
+    }
+
     public (PulseState State, string TodayLog) Load()
     {
+        CleanupSyncConflicts();
+
         if (!File.Exists(_pulsePath))
         {
             return (new PulseState(), "");
@@ -58,6 +85,8 @@ public partial class Storage
 
     public void Save(PulseState state, string todayLog, DateTime? previousCheckIn = null)
     {
+        CleanupSyncConflicts();
+
         // Check if day changed - archive if needed (use previousCheckIn if provided)
         var checkDate = previousCheckIn ?? state.LastCheckIn;
         if (checkDate?.Date < DateTime.Today)

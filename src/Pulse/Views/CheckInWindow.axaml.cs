@@ -12,15 +12,20 @@ namespace Pulse.Views;
 
 public partial class CheckInWindow : Window
 {
+    private static readonly TimeSpan AutoCloseTimeout = TimeSpan.FromMinutes(5);
+
     private readonly Storage _storage = new();
     private readonly DispatcherTimer _autoCloseTimer;
+    private readonly DispatcherTimer _countdownTimer;
     private readonly DateTime _openedAt;
+    private DateTime _autoCloseAt;
     private PulseState _state;
     private string _todayLog;
     private List<RecentTaskViewModel> _allRecentTasks = [];
 
     public ObservableCollection<TaskViewModel> Tasks { get; } = [];
     public string CurrentTime => DateTime.Now.ToString("HH:mm");
+    public string Version => typeof(CheckInWindow).Assembly.GetName().Version?.ToString(3) ?? "?";
 
     public CheckInWindow()
     {
@@ -34,13 +39,34 @@ public partial class CheckInWindow : Window
         LoadRecentTasks();
 
         // Auto-close after 5 minutes of inactivity
-        _autoCloseTimer = new DispatcherTimer { Interval = TimeSpan.FromMinutes(5) };
+        _autoCloseAt = DateTime.Now.Add(AutoCloseTimeout);
+        _autoCloseTimer = new DispatcherTimer { Interval = AutoCloseTimeout };
         _autoCloseTimer.Tick += OnAutoClose;
         _autoCloseTimer.Start();
+
+        // Update countdown display every second
+        _countdownTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+        _countdownTimer.Tick += OnCountdownTick;
+        _countdownTimer.Start();
+        UpdateCountdownText();
 
         // Reset timer on any pointer/key activity
         PointerPressed += (_, _) => ResetAutoCloseTimer();
         KeyDown += (_, _) => ResetAutoCloseTimer();
+    }
+
+    private void OnCountdownTick(object? sender, EventArgs e)
+    {
+        UpdateCountdownText();
+    }
+
+    private void UpdateCountdownText()
+    {
+        var remaining = _autoCloseAt - DateTime.Now;
+        if (remaining.TotalSeconds > 0)
+        {
+            DoneButton.Content = $"Done ({(int)remaining.TotalMinutes}:{remaining.Seconds:D2})";
+        }
     }
 
     private void LoadActiveTasks()
@@ -85,6 +111,7 @@ public partial class CheckInWindow : Window
     private void OnAutoClose(object? sender, EventArgs e)
     {
         _autoCloseTimer.Stop();
+        _countdownTimer.Stop();
         var previousCheckIn = _state.LastCheckIn;
 
         // Stop existing tasks at the time popup opened (skip new tasks added during this session)
@@ -109,6 +136,7 @@ public partial class CheckInWindow : Window
     private void OnDoneClick(object? sender, RoutedEventArgs e)
     {
         _autoCloseTimer.Stop();
+        _countdownTimer.Stop();
         var now = DateTime.Now;
         var previousCheckIn = _state.LastCheckIn;
 
@@ -152,7 +180,11 @@ public partial class CheckInWindow : Window
 
     private void OnShowAddTaskClick(object? sender, RoutedEventArgs e)
     {
-        ResetAutoCloseTimer();
+        // Pause auto-close while working in modal
+        _autoCloseTimer.Stop();
+        _countdownTimer.Stop();
+        DoneButton.Content = "Done";
+
         AddTaskPanel.IsVisible = true;
         AddTaskButton.IsVisible = false;
         TaskSearchBox.Text = "";
@@ -161,14 +193,16 @@ public partial class CheckInWindow : Window
 
     private void OnCancelAddClick(object? sender, RoutedEventArgs e)
     {
-        ResetAutoCloseTimer();
         AddTaskPanel.IsVisible = false;
         AddTaskButton.IsVisible = true;
+
+        // Resume auto-close timer
+        ResetAutoCloseTimer();
+        _countdownTimer.Start();
     }
 
     private void OnTaskSearchChanged(object? sender, TextChangedEventArgs e)
     {
-        ResetAutoCloseTimer();
         UpdateRecentTasksDisplay(TaskSearchBox.Text ?? "");
     }
 
@@ -182,7 +216,6 @@ public partial class CheckInWindow : Window
 
     private void OnRecentTaskSelected(object? sender, SelectionChangedEventArgs e)
     {
-        ResetAutoCloseTimer();
         if (RecentTasksList.SelectedItem is RecentTaskViewModel recent)
         {
             TaskSearchBox.Text = recent.Description;
@@ -193,8 +226,6 @@ public partial class CheckInWindow : Window
 
     private void OnAddTaskClick(object? sender, RoutedEventArgs e)
     {
-        ResetAutoCloseTimer();
-
         var description = TaskSearchBox.Text?.Trim();
         if (string.IsNullOrWhiteSpace(description))
             return;
@@ -216,6 +247,10 @@ public partial class CheckInWindow : Window
 
         AddTaskPanel.IsVisible = false;
         AddTaskButton.IsVisible = true;
+
+        // Resume auto-close timer
+        ResetAutoCloseTimer();
+        _countdownTimer.Start();
     }
 
     private Category GetSelectedCategory()
@@ -236,7 +271,6 @@ public partial class CheckInWindow : Window
 
     private void OnCategoryClick(object? sender, RoutedEventArgs e)
     {
-        ResetAutoCloseTimer();
         // Ensure only one category is selected (radio-like behavior)
         if (sender is ToggleButton clicked)
         {
@@ -250,6 +284,8 @@ public partial class CheckInWindow : Window
     private void ResetAutoCloseTimer()
     {
         _autoCloseTimer.Stop();
+        _autoCloseAt = DateTime.Now.Add(AutoCloseTimeout);
+        UpdateCountdownText();
         _autoCloseTimer.Start();
     }
 

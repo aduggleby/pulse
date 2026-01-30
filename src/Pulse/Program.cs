@@ -24,6 +24,9 @@ class Program
 
     private static bool TrySignalExistingInstance()
     {
+        if (!File.Exists(SocketPath))
+            return false;
+
         try
         {
             // Try to connect to existing instance
@@ -34,18 +37,16 @@ class Program
         }
         catch
         {
-            // No existing instance, or connection failed
+            // Stale socket file - clean it up
+            try { File.Delete(SocketPath); } catch { }
             return false;
         }
     }
 
     public static void StartListening(Action onShowRequested)
     {
-        // Clean up any stale socket file
-        if (File.Exists(SocketPath))
-        {
-            File.Delete(SocketPath);
-        }
+        // Clean up any stale socket file (shouldn't exist at this point, but just in case)
+        try { File.Delete(SocketPath); } catch { }
 
         var listener = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.Unspecified);
         listener.Bind(new UnixDomainSocketEndPoint(SocketPath));

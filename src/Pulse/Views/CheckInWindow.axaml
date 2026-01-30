@@ -236,11 +236,18 @@
                                DockPanel.Dock="Right"
                                VerticalAlignment="Top"/>
                     <StackPanel>
-                        <TextBlock Text="PULSE"
-                                   FontSize="22"
-                                   FontWeight="Bold"
-                                   Foreground="#5A5650"
-                                   LetterSpacing="6"/>
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <TextBlock Text="PULSE"
+                                       FontSize="22"
+                                       FontWeight="Bold"
+                                       Foreground="#5A5650"
+                                       LetterSpacing="6"/>
+                            <TextBlock Text="{Binding Version}"
+                                       FontSize="16"
+                                       Foreground="#4A4540"
+                                       VerticalAlignment="Bottom"
+                                       Margin="0,0,0,2"/>
+                        </StackPanel>
                         <TextBlock Text="What are you working on?"
                                    Classes="header-prompt"/>
                     </StackPanel>
