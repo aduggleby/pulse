@@ -51,6 +51,18 @@ Settings are stored in `~/.config/pulse/settings.json`:
   - `Pulse.md` - today's log and active state
   - `pulse/YYYY-MM-DD.md` - archived daily logs
 
+Categories can be customized by editing the `categories` field in the YAML frontmatter of `Pulse.md`:
+
+```yaml
+---
+categories:
+  - Work
+  - Hobby
+  - Exercise
+  - Family
+---
+```
+
 ## Data Format
 
 Pulse stores today's data in `Pulse.md` and archives previous days to `pulse/YYYY-MM-DD.md`. Works great with Obsidian:
