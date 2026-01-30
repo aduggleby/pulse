@@ -298,6 +298,29 @@ public partial class CheckInWindow : Window
             task.IsChecked = !task.IsChecked;
         }
     }
+
+    private async void OnDataDirectoryClick(object? sender, PointerPressedEventArgs e)
+    {
+        ResetAutoCloseTimer();
+
+        var storage = StorageProvider;
+        var startFolder = await storage.TryGetFolderFromPathAsync(new Uri("file://" + _storage.DataDirectory));
+
+        var result = await storage.OpenFolderPickerAsync(new Avalonia.Platform.Storage.FolderPickerOpenOptions
+        {
+            Title = "Select Data Directory",
+            SuggestedStartLocation = startFolder,
+            AllowMultiple = false
+        });
+
+        if (result.Count > 0)
+        {
+            var path = result[0].Path.LocalPath;
+            Storage.SaveDataDirectory(path);
+            // Update the display
+            DataDirectoryText.Text = path.Replace(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "~");
+        }
+    }
 }
 
 public class TaskViewModel : INotifyPropertyChanged

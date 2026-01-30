@@ -248,10 +248,20 @@
                                        VerticalAlignment="Bottom"
                                        Margin="0,0,0,2"/>
                         </StackPanel>
-                        <TextBlock Text="{Binding DataDirectory}"
+                        <TextBlock x:Name="DataDirectoryText"
+                                   Text="{Binding DataDirectory}"
                                    FontSize="18"
                                    Foreground="#6A6560"
-                                   Margin="0,4,0,0"/>
+                                   Margin="0,4,0,0"
+                                   Cursor="Hand"
+                                   PointerPressed="OnDataDirectoryClick">
+                            <TextBlock.Styles>
+                                <Style Selector="TextBlock:pointerover">
+                                    <Setter Property="Foreground" Value="#D4A574"/>
+                                    <Setter Property="TextDecorations" Value="Underline"/>
+                                </Style>
+                            </TextBlock.Styles>
+                        </TextBlock>
                         <TextBlock Text="What are you working on?"
                                    Classes="header-prompt"/>
                     </StackPanel>

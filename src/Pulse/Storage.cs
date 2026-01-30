@@ -68,6 +68,26 @@ public partial class Storage
         return null;
     }
 
+    public static void SaveDataDirectory(string path)
+    {
+        var dir = Path.GetDirectoryName(ConfigPath)!;
+        Directory.CreateDirectory(dir);
+
+        // Collapse home directory to ~
+        var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        if (path.StartsWith(home))
+        {
+            path = "~" + path[home.Length..];
+        }
+
+        var config = new PulseConfig { DataDirectory = path };
+        var json = System.Text.Json.JsonSerializer.Serialize(config, new System.Text.Json.JsonSerializerOptions
+        {
+            WriteIndented = true
+        });
+        File.WriteAllText(ConfigPath, json);
+    }
+
     private class PulseConfig
     {
         public string? DataDirectory { get; set; }
