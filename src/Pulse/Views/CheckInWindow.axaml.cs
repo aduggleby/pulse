@@ -172,6 +172,14 @@ public partial class CheckInWindow : Window
         UpdateRecentTasksDisplay(TaskSearchBox.Text ?? "");
     }
 
+    private void OnTaskSearchKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter)
+        {
+            OnAddTaskClick(sender, e);
+        }
+    }
+
     private void OnRecentTaskSelected(object? sender, SelectionChangedEventArgs e)
     {
         ResetAutoCloseTimer();

@@ -268,7 +268,8 @@
                     <TextBox x:Name="TaskSearchBox"
                              Classes="search-input"
                              Watermark="What are you starting?"
-                             TextChanged="OnTaskSearchChanged"/>
+                             TextChanged="OnTaskSearchChanged"
+                             KeyDown="OnTaskSearchKeyDown"/>
 
                     <!-- Recent Tasks List -->
                     <StackPanel IsVisible="{Binding #RecentTasksList.ItemCount}">
