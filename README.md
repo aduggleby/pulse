@@ -47,11 +47,13 @@ Settings are stored in `~/.config/pulse/settings.json`:
 }
 ```
 
-- `dataDirectory`: Where Pulse stores `Pulse.md` and archived logs (default: `~/pulse`)
+- `dataDirectory`: Where Pulse stores data (default: `~/pulse`)
+  - `Pulse.md` - today's log and active state
+  - `pulse/YYYY-MM-DD.md` - archived daily logs
 
 ## Data Format
 
-Pulse stores everything in a single markdown file (`Pulse.md`) that works great with Obsidian:
+Pulse stores today's data in `Pulse.md` and archives previous days to `pulse/YYYY-MM-DD.md`. Works great with Obsidian:
 
 ```markdown
 ---
