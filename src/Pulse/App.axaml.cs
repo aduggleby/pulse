@@ -23,6 +23,12 @@ public partial class App : Application
             // Keep app running after window closes
             desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
 
+            // Listen for signals from other instances
+            Program.StartListening(() =>
+            {
+                Dispatcher.UIThread.Post(ShowCheckInWindow);
+            });
+
             // Show first check-in immediately
             ShowCheckInWindow();
 
