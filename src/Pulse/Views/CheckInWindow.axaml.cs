@@ -84,9 +84,10 @@ public partial class CheckInWindow : Window
     private void OnAutoClose(object? sender, EventArgs e)
     {
         _autoCloseTimer.Stop();
+        var previousCheckIn = _state.LastCheckIn;
 
-        // Stop all tasks at the time popup opened
-        foreach (var task in Tasks.Where(t => t.IsChecked))
+        // Stop existing tasks at the time popup opened (skip new tasks added during this session)
+        foreach (var task in Tasks.Where(t => t.IsChecked && !t.IsNew))
         {
             _todayLog = _storage.AppendToLog(_todayLog, new ActiveTask
             {
@@ -99,7 +100,7 @@ public partial class CheckInWindow : Window
         _state.Active.Clear();
         _state.MissedCheckIn = _openedAt;
         _state.LastCheckIn = _openedAt;
-        _storage.Save(_state, _todayLog);
+        _storage.Save(_state, _todayLog, previousCheckIn);
 
         Close();
     }
@@ -108,6 +109,7 @@ public partial class CheckInWindow : Window
     {
         _autoCloseTimer.Stop();
         var now = DateTime.Now;
+        var previousCheckIn = _state.LastCheckIn;
 
         // Process unchecked tasks (stopped)
         foreach (var task in Tasks.Where(t => !t.IsChecked && !t.IsNew))
@@ -142,7 +144,7 @@ public partial class CheckInWindow : Window
 
         _state.LastCheckIn = now;
         _state.MissedCheckIn = null;
-        _storage.Save(_state, _todayLog);
+        _storage.Save(_state, _todayLog, previousCheckIn);
 
         Close();
     }

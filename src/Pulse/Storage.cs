@@ -42,6 +42,10 @@ public partial class Storage
             ? new PulseState()
             : _yamlDeserializer.Deserialize<PulseState>(frontmatter) ?? new PulseState();
 
+        // Ensure lists are not null (YAML can deserialize null)
+        state.Active ??= [];
+        state.Recent ??= [];
+
         // Strip headers, keep only log entries (lines starting with "- ")
         var logEntries = body
             .Split('\n')
@@ -51,12 +55,13 @@ public partial class Storage
         return (state, string.Join("\n", logEntries));
     }
 
-    public void Save(PulseState state, string todayLog)
+    public void Save(PulseState state, string todayLog, DateTime? previousCheckIn = null)
     {
-        // Check if day changed - archive if needed
-        if (state.LastCheckIn?.Date < DateTime.Today)
+        // Check if day changed - archive if needed (use previousCheckIn if provided)
+        var checkDate = previousCheckIn ?? state.LastCheckIn;
+        if (checkDate?.Date < DateTime.Today)
         {
-            ArchiveDay(state.LastCheckIn.Value.Date, todayLog);
+            ArchiveDay(checkDate.Value.Date, todayLog);
             todayLog = "";  // Reset for new day
         }
 
