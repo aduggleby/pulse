@@ -42,7 +42,13 @@ public partial class Storage
             ? new PulseState()
             : _yamlDeserializer.Deserialize<PulseState>(frontmatter) ?? new PulseState();
 
-        return (state, body.Trim());
+        // Strip headers, keep only log entries (lines starting with "- ")
+        var logEntries = body
+            .Split('\n')
+            .Where(line => line.StartsWith("- "))
+            .ToList();
+
+        return (state, string.Join("\n", logEntries));
     }
 
     public void Save(PulseState state, string todayLog)

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "D2Fv4aar1AY=",
+  "dgSpecHash": "VovsiP7M8Wg=",
   "success": true,
   "projectFilePath": "/home/alex/Source/pulse/src/Pulse/Pulse.csproj",
   "expectedPackageFiles": [
@@ -28,7 +28,9 @@
     "/home/alex/.nuget/packages/skiasharp.nativeassets.webassembly/2.88.9/skiasharp.nativeassets.webassembly.2.88.9.nupkg.sha512",
     "/home/alex/.nuget/packages/skiasharp.nativeassets.win32/2.88.9/skiasharp.nativeassets.win32.2.88.9.nupkg.sha512",
     "/home/alex/.nuget/packages/tmds.dbus.protocol/0.21.2/tmds.dbus.protocol.0.21.2.nupkg.sha512",
-    "/home/alex/.nuget/packages/yamldotnet/16.3.0/yamldotnet.16.3.0.nupkg.sha512"
+    "/home/alex/.nuget/packages/yamldotnet/16.3.0/yamldotnet.16.3.0.nupkg.sha512",
+    "/home/alex/.nuget/packages/microsoft.netcore.app.runtime.linux-x64/10.0.0/microsoft.netcore.app.runtime.linux-x64.10.0.0.nupkg.sha512",
+    "/home/alex/.nuget/packages/microsoft.aspnetcore.app.runtime.linux-x64/10.0.0/microsoft.aspnetcore.app.runtime.linux-x64.10.0.0.nupkg.sha512"
   ],
   "logs": []
 }
