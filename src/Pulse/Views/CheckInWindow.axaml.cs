@@ -1,0 +1,266 @@
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using Avalonia.Controls;
+using Avalonia.Interactivity;
+using Avalonia.Threading;
+using Pulse.Models;
+
+namespace Pulse.Views;
+
+public partial class CheckInWindow : Window
+{
+    private readonly Storage _storage = new();
+    private readonly DispatcherTimer _autoCloseTimer;
+    private readonly DateTime _openedAt;
+    private PulseState _state;
+    private string _todayLog;
+    private List<RecentTaskViewModel> _allRecentTasks = [];
+
+    public ObservableCollection<TaskViewModel> Tasks { get; } = [];
+    public string CurrentTime => DateTime.Now.ToString("HH:mm");
+
+    public CheckInWindow()
+    {
+        InitializeComponent();
+        DataContext = this;
+
+        _openedAt = DateTime.Now;
+        (_state, _todayLog) = _storage.Load();
+
+        LoadActiveTasks();
+        LoadRecentTasks();
+
+        // Auto-close after 5 minutes of inactivity
+        _autoCloseTimer = new DispatcherTimer { Interval = TimeSpan.FromMinutes(5) };
+        _autoCloseTimer.Tick += OnAutoClose;
+        _autoCloseTimer.Start();
+
+        // Reset timer on any pointer/key activity
+        PointerPressed += (_, _) => ResetAutoCloseTimer();
+        KeyDown += (_, _) => ResetAutoCloseTimer();
+    }
+
+    private void LoadActiveTasks()
+    {
+        foreach (var task in _state.Active)
+        {
+            Tasks.Add(new TaskViewModel
+            {
+                Description = task.Description,
+                Category = task.Category,
+                IsChecked = true,
+                Started = task.Started,
+                IsNew = false
+            });
+        }
+    }
+
+    private void LoadRecentTasks()
+    {
+        _allRecentTasks = _state.Recent
+            .Select(r => new RecentTaskViewModel
+            {
+                Description = r.Description,
+                Category = r.Category
+            })
+            .ToList();
+
+        UpdateRecentTasksDisplay("");
+    }
+
+    private void UpdateRecentTasksDisplay(string filter)
+    {
+        var filtered = string.IsNullOrWhiteSpace(filter)
+            ? _allRecentTasks.Take(10)
+            : _allRecentTasks
+                .Where(r => r.Description.Contains(filter, StringComparison.OrdinalIgnoreCase))
+                .Take(10);
+
+        RecentTasksList.ItemsSource = filtered.ToList();
+    }
+
+    private void OnAutoClose(object? sender, EventArgs e)
+    {
+        _autoCloseTimer.Stop();
+
+        // Stop all tasks at the time popup opened
+        foreach (var task in Tasks.Where(t => t.IsChecked))
+        {
+            _todayLog = _storage.AppendToLog(_todayLog, new ActiveTask
+            {
+                Description = task.Description,
+                Category = task.Category,
+                Started = task.Started
+            }, _openedAt);
+        }
+
+        _state.Active.Clear();
+        _state.MissedCheckIn = _openedAt;
+        _state.LastCheckIn = _openedAt;
+        _storage.Save(_state, _todayLog);
+
+        Close();
+    }
+
+    private void OnDoneClick(object? sender, RoutedEventArgs e)
+    {
+        _autoCloseTimer.Stop();
+        var now = DateTime.Now;
+
+        // Process unchecked tasks (stopped)
+        foreach (var task in Tasks.Where(t => !t.IsChecked && !t.IsNew))
+        {
+            _todayLog = _storage.AppendToLog(_todayLog, new ActiveTask
+            {
+                Description = task.Description,
+                Category = task.Category,
+                Started = task.Started
+            }, now);
+
+            _state.Active.RemoveAll(a =>
+                a.Description.Equals(task.Description, StringComparison.OrdinalIgnoreCase));
+        }
+
+        // Add new checked tasks to active
+        foreach (var task in Tasks.Where(t => t.IsChecked && t.IsNew))
+        {
+            _state.Active.Add(new ActiveTask
+            {
+                Description = task.Description,
+                Category = task.Category,
+                Started = now
+            });
+
+            _storage.AddToRecent(_state, new RecentTask
+            {
+                Description = task.Description,
+                Category = task.Category
+            });
+        }
+
+        _state.LastCheckIn = now;
+        _state.MissedCheckIn = null;
+        _storage.Save(_state, _todayLog);
+
+        Close();
+    }
+
+    private void OnShowAddTaskClick(object? sender, RoutedEventArgs e)
+    {
+        ResetAutoCloseTimer();
+        AddTaskPanel.IsVisible = true;
+        AddTaskButton.IsVisible = false;
+        TaskSearchBox.Text = "";
+        TaskSearchBox.Focus();
+    }
+
+    private void OnCancelAddClick(object? sender, RoutedEventArgs e)
+    {
+        ResetAutoCloseTimer();
+        AddTaskPanel.IsVisible = false;
+        AddTaskButton.IsVisible = true;
+    }
+
+    private void OnTaskSearchChanged(object? sender, TextChangedEventArgs e)
+    {
+        ResetAutoCloseTimer();
+        UpdateRecentTasksDisplay(TaskSearchBox.Text ?? "");
+    }
+
+    private void OnRecentTaskSelected(object? sender, SelectionChangedEventArgs e)
+    {
+        ResetAutoCloseTimer();
+        if (RecentTasksList.SelectedItem is RecentTaskViewModel recent)
+        {
+            TaskSearchBox.Text = recent.Description;
+            SetCategoryRadio(recent.Category);
+            RecentTasksList.SelectedItem = null;
+        }
+    }
+
+    private void OnAddTaskClick(object? sender, RoutedEventArgs e)
+    {
+        ResetAutoCloseTimer();
+
+        var description = TaskSearchBox.Text?.Trim();
+        if (string.IsNullOrWhiteSpace(description))
+            return;
+
+        // Check if already in list
+        if (Tasks.Any(t => t.Description.Equals(description, StringComparison.OrdinalIgnoreCase)))
+            return;
+
+        var category = GetSelectedCategory();
+
+        Tasks.Add(new TaskViewModel
+        {
+            Description = description,
+            Category = category,
+            IsChecked = true,
+            Started = DateTime.Now,
+            IsNew = true
+        });
+
+        AddTaskPanel.IsVisible = false;
+        AddTaskButton.IsVisible = true;
+    }
+
+    private Category GetSelectedCategory()
+    {
+        if (CategoryWork.IsChecked == true) return Category.Work;
+        if (CategoryHobby.IsChecked == true) return Category.Hobby;
+        if (CategoryRelationship.IsChecked == true) return Category.Relationship;
+        return Category.Other;
+    }
+
+    private void SetCategoryRadio(Category category)
+    {
+        CategoryWork.IsChecked = category == Category.Work;
+        CategoryHobby.IsChecked = category == Category.Hobby;
+        CategoryRelationship.IsChecked = category == Category.Relationship;
+        CategoryOther.IsChecked = category == Category.Other;
+    }
+
+    private void ResetAutoCloseTimer()
+    {
+        _autoCloseTimer.Stop();
+        _autoCloseTimer.Start();
+    }
+}
+
+public class TaskViewModel : INotifyPropertyChanged
+{
+    private bool _isChecked;
+
+    public string Description { get; set; } = "";
+    public Category Category { get; set; }
+    public DateTime Started { get; set; }
+    public bool IsNew { get; set; }
+
+    public bool IsChecked
+    {
+        get => _isChecked;
+        set
+        {
+            _isChecked = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public string CategoryDisplay => $"[{Category}]";
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    protected void OnPropertyChanged([CallerMemberName] string? name = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+    }
+}
+
+public class RecentTaskViewModel
+{
+    public string Description { get; set; } = "";
+    public Category Category { get; set; }
+    public string CategoryDisplay => $"[{Category}]";
+}

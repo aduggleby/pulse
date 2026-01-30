@@ -1,0 +1,132 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="clr-namespace:Pulse.Views"
+        x:Class="Pulse.Views.CheckInWindow"
+        x:DataType="views:CheckInWindow"
+        Title="Pulse"
+        Width="400"
+        Height="500"
+        WindowStartupLocation="CenterScreen"
+        CanResize="False">
+
+    <DockPanel Margin="16">
+        <!-- Header -->
+        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,16">
+            <TextBlock Text="{Binding CurrentTime}"
+                       DockPanel.Dock="Right"
+                       VerticalAlignment="Center"
+                       FontSize="16"
+                       Foreground="Gray"/>
+            <TextBlock Text="What are you doing?"
+                       FontSize="20"
+                       FontWeight="SemiBold"/>
+        </DockPanel>
+
+        <!-- Done Button -->
+        <Button x:Name="DoneButton"
+                DockPanel.Dock="Bottom"
+                Content="Done"
+                HorizontalAlignment="Center"
+                Padding="32,8"
+                Margin="0,16,0,0"
+                Click="OnDoneClick"/>
+
+        <!-- Add Task Panel (collapsible) -->
+        <Border x:Name="AddTaskPanel"
+                DockPanel.Dock="Bottom"
+                IsVisible="False"
+                BorderBrush="LightGray"
+                BorderThickness="1"
+                CornerRadius="4"
+                Padding="12"
+                Margin="0,12,0,0">
+            <StackPanel Spacing="12">
+                <!-- Search/New Task Input -->
+                <TextBox x:Name="TaskSearchBox"
+                         Watermark="Search or type new task..."
+                         TextChanged="OnTaskSearchChanged"/>
+
+                <!-- Recent Tasks List -->
+                <ListBox x:Name="RecentTasksList"
+                         MaxHeight="120"
+                         SelectionChanged="OnRecentTaskSelected">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="views:RecentTaskViewModel">
+                            <DockPanel>
+                                <TextBlock Text="{Binding CategoryDisplay}"
+                                           DockPanel.Dock="Right"
+                                           Foreground="Gray"
+                                           Margin="8,0,0,0"/>
+                                <TextBlock Text="{Binding Description}"/>
+                            </DockPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+                <!-- Category Selection -->
+                <StackPanel Spacing="8">
+                    <TextBlock Text="Category:" FontWeight="SemiBold"/>
+                    <WrapPanel>
+                        <RadioButton x:Name="CategoryWork"
+                                     Content="Work"
+                                     GroupName="Category"
+                                     IsChecked="True"
+                                     Margin="0,0,16,0"/>
+                        <RadioButton x:Name="CategoryHobby"
+                                     Content="Hobby"
+                                     GroupName="Category"
+                                     Margin="0,0,16,0"/>
+                        <RadioButton x:Name="CategoryRelationship"
+                                     Content="Relationship"
+                                     GroupName="Category"
+                                     Margin="0,0,16,0"/>
+                        <RadioButton x:Name="CategoryOther"
+                                     Content="Other"
+                                     GroupName="Category"/>
+                    </WrapPanel>
+                </StackPanel>
+
+                <!-- Add/Cancel Buttons -->
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Right"
+                            Spacing="8">
+                    <Button Content="Cancel" Click="OnCancelAddClick"/>
+                    <Button x:Name="AddButton"
+                            Content="Add"
+                            Click="OnAddTaskClick"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- Add Task Button -->
+        <Button x:Name="AddTaskButton"
+                DockPanel.Dock="Bottom"
+                Content="+ Add Task"
+                HorizontalAlignment="Left"
+                Margin="0,12,0,0"
+                Click="OnShowAddTaskClick"/>
+
+        <!-- Active Tasks List -->
+        <ScrollViewer>
+            <ItemsControl x:Name="TasksListBox" ItemsSource="{Binding Tasks}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="views:TaskViewModel">
+                        <Border Margin="0,4" Padding="8"
+                                Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}"
+                                CornerRadius="4">
+                            <DockPanel>
+                                <TextBlock Text="{Binding CategoryDisplay}"
+                                           DockPanel.Dock="Right"
+                                           VerticalAlignment="Center"
+                                           Foreground="Gray"/>
+                                <CheckBox IsChecked="{Binding IsChecked}"
+                                          Content="{Binding Description}"
+                                          Margin="0,0,8,0"/>
+                            </DockPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </DockPanel>
+</Window>

@@ -374,15 +374,15 @@ public partial class CheckInWindow : Window
 Build it all, ship it, use it for 2 weeks.
 
 **Tasks:**
-- [ ] Create Avalonia project with .NET 10
-- [ ] Implement `Storage.cs` - read/write Pulse.md with YAML frontmatter
-- [ ] Implement day archiving - move log to `pulse/YYYY-MM-DD.md`
-- [ ] Add hourly timer in App.axaml.cs
-- [ ] Create `CheckInWindow` - task checkboxes, add task panel
-- [ ] Implement 100 recent tasks with search/filter
-- [ ] Add 5-minute auto-close timer
-- [ ] Add category radio buttons
-- [ ] Test full flow: hourly popup → check tasks → save → archive on day change
+- [x] Create Avalonia project with .NET 10
+- [x] Implement `Storage.cs` - read/write Pulse.md with YAML frontmatter
+- [x] Implement day archiving - move log to `pulse/YYYY-MM-DD.md`
+- [x] Add hourly timer in App.axaml.cs
+- [x] Create `CheckInWindow` - task checkboxes, add task panel
+- [x] Implement 100 recent tasks with search/filter
+- [x] Add 5-minute auto-close timer
+- [x] Add category radio buttons
+- [x] Test full flow: hourly popup → check tasks → save → archive on day change
 
 **Estimated:** ~400 LOC, weekend project
 
