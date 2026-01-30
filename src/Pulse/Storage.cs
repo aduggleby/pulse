@@ -12,6 +12,10 @@ public partial class Storage
     private readonly string _archiveDir;
     private const int MaxRecentTasks = 100;
 
+    private static readonly string ConfigPath = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+        ".config", "pulse", "settings.json");
+
     private readonly IDeserializer _yamlDeserializer = new DeserializerBuilder()
         .WithNamingConvention(CamelCaseNamingConvention.Instance)
         .Build();
@@ -21,11 +25,52 @@ public partial class Storage
         .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitNull)
         .Build();
 
+    public string DataDirectory { get; }
+
     public Storage()
     {
         var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-        _pulsePath = Path.Combine(home, "Me", "Info", "Pulse.md");
-        _archiveDir = Path.Combine(home, "Me", "Info", "pulse");
+        DataDirectory = LoadDataDirectory() ?? Path.Combine(home, "pulse");
+
+        _pulsePath = Path.Combine(DataDirectory, "Pulse.md");
+        _archiveDir = Path.Combine(DataDirectory, "pulse");
+    }
+
+    private static string? LoadDataDirectory()
+    {
+        if (!File.Exists(ConfigPath))
+            return null;
+
+        try
+        {
+            var json = File.ReadAllText(ConfigPath);
+            var options = new System.Text.Json.JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+            var config = System.Text.Json.JsonSerializer.Deserialize<PulseConfig>(json, options);
+            if (!string.IsNullOrWhiteSpace(config?.DataDirectory))
+            {
+                // Expand ~ to home directory
+                var path = config.DataDirectory;
+                if (path.StartsWith("~/"))
+                {
+                    var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+                    path = Path.Combine(home, path[2..]);
+                }
+                return path;
+            }
+        }
+        catch
+        {
+            // Ignore config errors, use default
+        }
+        return null;
+    }
+
+    private class PulseConfig
+    {
+        public string? DataDirectory { get; set; }
     }
 
     private void CleanupSyncConflicts()
@@ -151,18 +196,40 @@ public partial class Storage
 
     public string AppendToLog(string currentLog, ActiveTask task, DateTime endTime)
     {
-        var line = $"- [{task.Category}] {task.Description} ({task.Started:HH:mm} - {endTime:HH:mm})";
-        return string.IsNullOrWhiteSpace(currentLog)
-            ? line
-            : currentLog + "\n" + line;
+        var timeRange = $"{task.Started:HH:mm} - {endTime:HH:mm}";
+        return AppendTimeToLog(currentLog, task.Category, task.Description, timeRange);
     }
 
     public string AppendOngoingToLog(string currentLog, ActiveTask task)
     {
-        var line = $"- [{task.Category}] {task.Description} ({task.Started:HH:mm} - ongoing)";
-        return string.IsNullOrWhiteSpace(currentLog)
-            ? line
-            : currentLog + "\n" + line;
+        var timeRange = $"{task.Started:HH:mm} - ongoing";
+        return AppendTimeToLog(currentLog, task.Category, task.Description, timeRange);
+    }
+
+    private string AppendTimeToLog(string currentLog, Category category, string description, string timeRange)
+    {
+        if (string.IsNullOrWhiteSpace(currentLog))
+        {
+            return $"- [{category}] {description} ({timeRange})";
+        }
+
+        // Look for existing entry with same category and description
+        var prefix = $"- [{category}] {description} (";
+        var lines = currentLog.Split('\n').ToList();
+
+        for (int i = 0; i < lines.Count; i++)
+        {
+            if (lines[i].StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            {
+                // Found existing entry - append time range
+                // Remove trailing ) and add new time range
+                lines[i] = lines[i].TrimEnd(')') + $", {timeRange})";
+                return string.Join("\n", lines);
+            }
+        }
+
+        // No existing entry - add new line
+        return currentLog + "\n" + $"- [{category}] {description} ({timeRange})";
     }
 
     private static (string Frontmatter, string Body) ParseFrontmatter(string content)

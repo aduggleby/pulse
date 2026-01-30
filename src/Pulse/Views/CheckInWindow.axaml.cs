@@ -26,6 +26,7 @@ public partial class CheckInWindow : Window
     public ObservableCollection<TaskViewModel> Tasks { get; } = [];
     public string CurrentTime => DateTime.Now.ToString("HH:mm");
     public string Version => typeof(CheckInWindow).Assembly.GetName().Version?.ToString(3) ?? "?";
+    public string DataDirectory => _storage.DataDirectory.Replace(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "~");
 
     public CheckInWindow()
     {

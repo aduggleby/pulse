@@ -248,6 +248,10 @@
                                        VerticalAlignment="Bottom"
                                        Margin="0,0,0,2"/>
                         </StackPanel>
+                        <TextBlock Text="{Binding DataDirectory}"
+                                   FontSize="18"
+                                   Foreground="#6A6560"
+                                   Margin="0,4,0,0"/>
                         <TextBlock Text="What are you working on?"
                                    Classes="header-prompt"/>
                     </StackPanel>
