@@ -32,7 +32,10 @@ cd pulse
 dotnet publish -c Release -r linux-x64 --self-contained false -o dist/linux-x64
 ```
 
-Replace `linux-x64` with `osx-x64`, `osx-arm64`, or `win-x64` for other platforms.
+Replace `linux-x64` with your platform:
+- `osx-x64` - macOS Intel
+- `osx-arm64` - macOS Apple Silicon
+- `win-x64` - Windows
 
 ## Configuration
 
