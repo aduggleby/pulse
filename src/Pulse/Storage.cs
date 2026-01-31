@@ -273,6 +273,36 @@ public partial class Storage
     [GeneratedRegex(@"(\d{2}:\d{2})\s*-\s*(\d{2}:\d{2}|ongoing)")]
     private static partial Regex TimeRangeRegex();
 
+    [GeneratedRegex(@"^\- \[(\w+)\] (.+?) \(")]
+    private static partial Regex LogEntryRegex();
+
+    public List<RecentTask> ParseTasksFromLog(string log)
+    {
+        var tasks = new List<RecentTask>();
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var line in log.Split('\n'))
+        {
+            var match = LogEntryRegex().Match(line);
+            if (!match.Success)
+                continue;
+
+            var categoryStr = match.Groups[1].Value;
+            var description = match.Groups[2].Value;
+
+            if (seen.Contains(description))
+                continue;
+            seen.Add(description);
+
+            if (Enum.TryParse<Category>(categoryStr, true, out var category))
+            {
+                tasks.Add(new RecentTask { Description = description, Category = category });
+            }
+        }
+
+        return tasks;
+    }
+
     public void AddToRecent(PulseState state, RecentTask task)
     {
         // Remove if already exists (will re-add at front)

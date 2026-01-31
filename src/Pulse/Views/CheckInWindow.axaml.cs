@@ -72,6 +72,7 @@ public partial class CheckInWindow : Window
 
     private void LoadActiveTasks()
     {
+        // Load active tasks (checked)
         foreach (var task in _state.Active)
         {
             Tasks.Add(new TaskViewModel
@@ -81,6 +82,24 @@ public partial class CheckInWindow : Window
                 IsChecked = true,
                 Started = task.Started,
                 IsNew = false
+            });
+        }
+
+        // Load stopped tasks from today's log (unchecked, for easy resume)
+        var stoppedTasks = _storage.ParseTasksFromLog(_todayLog);
+        var activeDescriptions = _state.Active
+            .Select(a => a.Description)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var task in stoppedTasks.Where(t => !activeDescriptions.Contains(t.Description)))
+        {
+            Tasks.Add(new TaskViewModel
+            {
+                Description = task.Description,
+                Category = task.Category,
+                IsChecked = false,
+                Started = DateTime.Now,
+                IsNew = true  // Treat as new so checking adds to Active
             });
         }
     }
