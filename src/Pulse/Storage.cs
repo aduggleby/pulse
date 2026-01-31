@@ -33,7 +33,7 @@ public partial class Storage
         DataDirectory = LoadDataDirectory() ?? Path.Combine(home, "pulse");
 
         _pulsePath = Path.Combine(DataDirectory, "Today.md");
-        _archiveDir = DataDirectory;
+        _archiveDir = Path.Combine(DataDirectory, "Archive");
     }
 
     private static string? LoadDataDirectory()
