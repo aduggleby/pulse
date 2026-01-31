@@ -11,13 +11,16 @@ dotnet build
 # Run in development
 dotnet run --project src/Pulse
 
-# Publish for deployment (targets ~/.local/share/applications/pulse.desktop path)
+# Publish for deployment
 dotnet publish -c Release -r linux-x64 --self-contained false -o dist/linux-x64
 
-# Kill running instances and deploy
-pkill -9 -f "Pulse" 2>/dev/null; rm -f /tmp/pulse-$USER.sock
-dotnet publish -c Release -r linux-x64 --self-contained false -o dist/linux-x64
+# Kill, publish, and restart (use this when deploying changes)
+pkill -9 -f "Pulse" 2>/dev/null; rm -f /tmp/pulse-$USER.sock; dotnet publish -c Release -r linux-x64 --self-contained false -o dist/linux-x64 && ./dist/linux-x64/Pulse --background &
 ```
+
+## Command Line Options
+
+- `--background`: Start without showing the dialog immediately. App runs in background and shows dialog on the next hourly tick or when signaled by another instance.
 
 ## Architecture
 

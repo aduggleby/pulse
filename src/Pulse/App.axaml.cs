@@ -30,8 +30,11 @@ public partial class App : Application
                 Dispatcher.UIThread.Post(ShowCheckInWindow);
             });
 
-            // Show first check-in immediately
-            ShowCheckInWindow();
+            // Show first check-in immediately (unless started with --background)
+            if (!Program.StartInBackground)
+            {
+                ShowCheckInWindow();
+            }
 
             // Schedule next check-in at the hour boundary
             ScheduleNextCheckIn();

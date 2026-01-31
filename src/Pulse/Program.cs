@@ -8,9 +8,13 @@ class Program
 {
     private const string AppId = "Pulse";
 
+    public static bool StartInBackground { get; private set; }
+
     [STAThread]
     public static void Main(string[] args)
     {
+        StartInBackground = args.Contains("--background");
+
         // Try to signal existing instance
         if (TrySignalExistingInstance())
         {
