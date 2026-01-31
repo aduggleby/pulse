@@ -194,9 +194,74 @@ public partial class Storage
         Directory.CreateDirectory(_archiveDir);
 
         var archivePath = Path.Combine(_archiveDir, $"{date:yyyy-MM-dd}.md");
-        var content = $"# {date:yyyy-MM-dd}\n\n{dayLog}";
+        var summary = GenerateDaySummary(dayLog);
+        var content = $"# {date:yyyy-MM-dd}\n\n{summary}\n## Log\n\n{dayLog}";
         File.WriteAllText(archivePath, content);
     }
+
+    private string GenerateDaySummary(string dayLog)
+    {
+        var taskTimes = new Dictionary<string, TimeSpan>();
+        var timeRangeRegex = TimeRangeRegex();
+
+        foreach (var line in dayLog.Split('\n'))
+        {
+            if (!line.StartsWith("- ["))
+                continue;
+
+            // Extract task name (everything between ] and ()
+            var bracketEnd = line.IndexOf(']');
+            var parenStart = line.LastIndexOf('(');
+            if (bracketEnd < 0 || parenStart < 0 || parenStart <= bracketEnd)
+                continue;
+
+            var taskName = line[(bracketEnd + 2)..parenStart].Trim();
+            var timesPart = line[(parenStart + 1)..].TrimEnd(')');
+
+            var totalTime = TimeSpan.Zero;
+            foreach (Match match in timeRangeRegex.Matches(timesPart))
+            {
+                var startTime = TimeSpan.Parse(match.Groups[1].Value);
+                var endStr = match.Groups[2].Value;
+
+                if (endStr == "ongoing")
+                    continue;
+
+                var endTime = TimeSpan.Parse(endStr);
+                var duration = endTime - startTime;
+                if (duration < TimeSpan.Zero)
+                    duration += TimeSpan.FromHours(24); // Handle midnight crossing
+
+                totalTime += duration;
+            }
+
+            if (totalTime > TimeSpan.Zero)
+            {
+                if (taskTimes.ContainsKey(taskName))
+                    taskTimes[taskName] += totalTime;
+                else
+                    taskTimes[taskName] = totalTime;
+            }
+        }
+
+        if (taskTimes.Count == 0)
+            return "";
+
+        var sb = new StringBuilder();
+        sb.AppendLine("## Summary\n");
+        foreach (var (task, time) in taskTimes.OrderByDescending(x => x.Value))
+        {
+            var hours = (int)time.TotalHours;
+            var minutes = time.Minutes;
+            var timeStr = hours > 0 ? $"{hours}h {minutes}m" : $"{minutes}m";
+            sb.AppendLine($"- **{task}**: {timeStr}");
+        }
+
+        return sb.ToString();
+    }
+
+    [GeneratedRegex(@"(\d{2}:\d{2})\s*-\s*(\d{2}:\d{2}|ongoing)")]
+    private static partial Regex TimeRangeRegex();
 
     public void AddToRecent(PulseState state, RecentTask task)
     {
