@@ -145,7 +145,16 @@ public partial class Storage
             .Where(line => line.StartsWith("- "))
             .ToList();
 
-        return (state, string.Join("\n", logEntries));
+        var todayLog = string.Join("\n", logEntries);
+
+        // Archive previous day's log if day changed (before returning to caller)
+        if (state.LastCheckIn?.Date < DateTime.Today && !string.IsNullOrWhiteSpace(todayLog))
+        {
+            ArchiveDay(state.LastCheckIn.Value.Date, todayLog);
+            todayLog = "";  // Start fresh for today
+        }
+
+        return (state, todayLog);
     }
 
     public void Save(PulseState state, string todayLog, DateTime? previousCheckIn = null)
