@@ -48,10 +48,10 @@ Settings are stored in `~/.config/pulse/settings.json`:
 ```
 
 - `dataDirectory`: Where Pulse stores data (default: `~/pulse`)
-  - `Pulse.md` - today's log and active state
-  - `pulse/YYYY-MM-DD.md` - archived daily logs
+  - `Today.md` - today's log and active state
+  - `Archive/YYYY-MM-DD.md` - archived daily logs with time summaries
 
-Categories can be customized by editing the `categories` field in the YAML frontmatter of `Pulse.md`:
+Categories can be customized by editing the `categories` field in the YAML frontmatter of `Today.md`:
 
 ```yaml
 ---
@@ -65,7 +65,9 @@ categories:
 
 ## Data Format
 
-Pulse stores today's data in `Pulse.md` and archives previous days to `pulse/YYYY-MM-DD.md`. Works great with Obsidian:
+Pulse stores today's data in `Today.md` and archives previous days to `Archive/YYYY-MM-DD.md`. Works great with Obsidian.
+
+### Today.md
 
 ```markdown
 ---
@@ -82,6 +84,24 @@ lastCheckIn: 2026-01-30T15:00
 # Pulse Log
 
 ## 2026-01-30
+
+- [Work] Writing code (09:00 - 12:00, 14:00 - 17:00)
+- [Hobby] Reading (12:00 - 13:00)
+```
+
+### Archive/YYYY-MM-DD.md
+
+Daily archives include a summary of time spent per task:
+
+```markdown
+# 2026-01-30
+
+## Summary
+
+- **Writing code**: 6h 0m
+- **Reading**: 1h 0m
+
+## Log
 
 - [Work] Writing code (09:00 - 12:00, 14:00 - 17:00)
 - [Hobby] Reading (12:00 - 13:00)
