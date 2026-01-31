@@ -21,13 +21,13 @@ dotnet publish -c Release -r linux-x64 --self-contained false -o dist/linux-x64
 
 ## Architecture
 
-Pulse is an Avalonia UI desktop app that pops up hourly to track what you're working on. Data is stored in a single markdown file with YAML frontmatter (`~/Me/Info/Pulse.md`).
+Pulse is an Avalonia UI desktop app that pops up hourly to track what you're working on. Data is stored in a single markdown file with YAML frontmatter (`~/Me/Pulse/Today.md`).
 
 ### Key Components
 
 - **Program.cs**: Entry point with Unix socket singleton pattern. Prevents multiple instances; signals existing instance to show dialog if already running.
 - **App.axaml.cs**: Application lifecycle. Schedules hourly check-ins, tracks current window to prevent duplicate dialogs.
-- **Storage.cs**: Reads/writes `Pulse.md`. Handles YAML frontmatter parsing, day archiving, and Syncthing conflict cleanup.
+- **Storage.cs**: Reads/writes `Today.md`. Handles YAML frontmatter parsing, day archiving, and Syncthing conflict cleanup.
 - **Views/CheckInWindow**: Main popup UI. Shows active tasks, handles add/remove, auto-closes after 5 minutes of inactivity with countdown timer.
 - **Models/**: `PulseState` (frontmatter data), `Category` enum, task models.
 
@@ -37,7 +37,7 @@ Uses Unix domain socket at `/tmp/pulse-{username}.sock`. New instances signal "s
 
 ### Data Flow
 
-1. On startup/hourly tick: Load state from `Pulse.md` frontmatter
+1. On startup/hourly tick: Load state from `Today.md` frontmatter
 2. User interacts with popup
 3. On Done/auto-close: Update frontmatter, append to day's log, archive previous day if needed
 

@@ -32,8 +32,8 @@ public partial class Storage
         var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
         DataDirectory = LoadDataDirectory() ?? Path.Combine(home, "pulse");
 
-        _pulsePath = Path.Combine(DataDirectory, "Pulse.md");
-        _archiveDir = Path.Combine(DataDirectory, "pulse");
+        _pulsePath = Path.Combine(DataDirectory, "Today.md");
+        _archiveDir = DataDirectory;
     }
 
     private static string? LoadDataDirectory()
