@@ -21,7 +21,7 @@ dotnet publish -c Release -r linux-x64 --self-contained false -o dist/linux-x64
 
 ## Architecture
 
-Pulse is an Avalonia UI desktop app that pops up hourly to track what you're working on. Data is stored in a single markdown file with YAML frontmatter (`~/Me/Pulse/Today.md`).
+Pulse is an Avalonia UI desktop app that pops up hourly to track what you're working on. Data is stored in a single markdown file with YAML frontmatter (`~/Me/Info/Pulse/Today.md`).
 
 ### Key Components
 
