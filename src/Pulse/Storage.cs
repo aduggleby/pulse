@@ -202,7 +202,8 @@ public partial class Storage
 
         Directory.CreateDirectory(_archiveDir);
 
-        var archivePath = Path.Combine(_archiveDir, $"{date:yyyy-MM-dd}.md");
+        var weekday = date.ToString("ddd")[..2];
+        var archivePath = Path.Combine(_archiveDir, $"{date:yyyy-MM-dd}-{weekday}.md");
         var summary = GenerateDaySummary(dayLog);
         var content = $"# {date:yyyy-MM-dd}\n\n{summary}\n## Log\n\n{dayLog}";
         File.WriteAllText(archivePath, content);
