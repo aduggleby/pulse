@@ -110,3 +110,7 @@ Daily archives include a summary of time spent per task:
 ## License
 
 MIT License - see [LICENSE](LICENSE)
+
+## Related Repos
+
+- `localsend-cli`: Headless LocalSend CLI for automation and LLM control.
